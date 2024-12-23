@@ -1,37 +1,66 @@
-import React from 'react';
-import { FlatList, Text, View, Image} from 'react-native';
-import player_1 from '../assets/images/component_imgs/player_1.png'
-import player_2 from '../assets/images/component_imgs/player_2.png'
+import React, { useState, useCallback } from 'react';
+import { FlatList, Text, View, Image } from 'react-native';
+import alligator_image from '../assets/images/player_images/alligator.png';
+import bear_image from '../assets/images/player_images/bear.png';
+import cat_image from '../assets/images/player_images/cat.png';
+import fox_image from '../assets/images/player_images/fox.png';
+import rabit_image from '../assets/images/player_images/rabit.png';
+import cow_image from '../assets/images/player_images/cow.png';
+import dog_image from '../assets/images/player_images/dog.png';
+import alien_image from '../assets/images/player_images/alien.png';
+import goril_image from '../assets/images/player_images/goril.png';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useFocusEffect } from '@react-navigation/native';
 
 const LeaderBoardList = () => {
-  const data = [
-    { id: '1', title: 'Adil', score:4, profile: player_1 },
-    { id: '2', title: 'Ilafer', score:3, profile: player_2 },
-    { id: '3', title: 'Adil', score:4, profile: player_1 },
-    { id: '4', title: 'Adil', score:4, profile: player_1 },
-    { id: '5', title: 'Adil', score:4, profile: player_1 },
-    { id: '6', title: 'Adil', score:4, profile: player_1 },
-    { id: '7', title: 'Adil', score:4, profile: player_1 },
-
+  const db = useSQLiteContext();
+  const [data, setData] = useState([]);
+  
+  const images = [
+    alligator_image, 
+    bear_image, 
+    cat_image, 
+    goril_image,
+    dog_image, 
+    cow_image, 
+    fox_image, 
+    rabit_image, 
+    alien_image, 
   ];
+
+  useFocusEffect(
+    useCallback(() => {
+      const result = db.getAllSync("SELECT * FROM players ORDER BY score DESC");
+
+      const updatedData = result.map((player) => {
+        const imageIndex = player.image - 1; 
+        const resolvedImage = images[imageIndex]
+        return { ...player, resolvedImage };
+      });
+
+      setData(updatedData);
+    }, [db])
+  );
 
   const renderItem = ({ item }) => (
     <View className="flex-row items-center px-10 py-6 m-4 justify-between border-b border-primary-200"> 
-        <Text className = "text-text-dark text-lg font-bold">{item.id}</Text>
-        <View className = "flex-row gap-4 items-center">
-          <Image source={item.profile} className = "w-[50px] h-[50px]"/>
-          <Text className = "text-text-dark text-xl font-bold">{item.title}</Text>  
-        </View>
-        <Text className = "text-text-dark text-[30px] font-bold">{item.score}</Text>
+      <Text className="text-text-dark text-lg font-bold">
+        {data.findIndex((element) => element.name === item.name) + 1}
+      </Text>
+      <View className="flex-row gap-4 items-center">
+        <Image source={item.resolvedImage} className="w-[50px] h-[50px]" />
+        <Text className="text-text-dark text-xl font-bold">{item.name}</Text>  
+      </View>
+      <Text className="text-text-dark text-[30px] font-bold">{item.score}</Text>
     </View>
   );
 
   return (
     <FlatList
-      className = "w-full"
+      className="w-full"
       data={data}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
     />
   );
 };

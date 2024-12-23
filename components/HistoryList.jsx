@@ -1,76 +1,81 @@
-import React from 'react';
-import { FlatList, Text, View, Image} from 'react-native';
-import player_1_image from '../assets/images/component_imgs/player_1.png'
-import player_2_image from '../assets/images/component_imgs/player_2.png'
-import versus_small from '../assets/images/component_imgs/versus_small.png'
+import React, { useCallback, useState } from 'react';
+import { FlatList, Text, View, Image } from 'react-native';
+import alligator_image from '../assets/images/player_images/alligator.png';
+import bear_image from '../assets/images/player_images/bear.png';
+import cat_image from '../assets/images/player_images/cat.png';
+import fox_image from '../assets/images/player_images/fox.png';
+import rabit_image from '../assets/images/player_images/rabit.png';
+import cow_image from '../assets/images/player_images/cow.png';
+import dog_image from '../assets/images/player_images/dog.png';
+import alien_image from '../assets/images/player_images/alien.png';
+import goril_image from '../assets/images/player_images/goril.png';
+import versus_small from '../assets/images/component_imgs/versus_small.png';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useFocusEffect } from '@react-navigation/native';
 
 const HistoryList = () => {
-  const data = [
-    {   id: '1', game_name:"PES 21", 
-        player_1: 'Adil', score_1:2, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:4, profile_2: player_2_image
-    },
-    {   id: '2', game_name:"PES 21", 
-        player_1: 'Adil', score_1:4, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:0, profile_2: player_2_image
-    },
-    {   id: '3', game_name:"PES 21",
-        player_1: 'Adil', score_1:2, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:2, profile_2: player_2_image
-    },
-    {   id: '4', game_name:"PES 21",
-        player_1: 'Adil', score_1:1, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:5, profile_2: player_2_image
-    },
-    {   id: '5', game_name:"PES 21",
-        player_1: 'Adil', score_1:3, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:0, profile_2: player_2_image
-    },
-    {   id: '6', game_name:"PES 21",
-        player_1: 'Adil', score_1:2, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:4, profile_2: player_2_image
-    },
-    {   id: '7', game_name:"PES 21",
-        player_1: 'Adil', score_1:1, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:1, profile_2: player_2_image
-    },
-    {   id: '8', game_name:"PES 21",
-        player_1: 'Adil', score_1:4, profile_1: player_1_image,
-        player_2: 'Ilafer', score_2:4, profile_2: player_2_image
-    },
+  const db = useSQLiteContext();
+  const [data, setData] = useState([]);
+
+  const images = [
+      alligator_image, 
+      bear_image, 
+      cat_image, 
+      goril_image,
+      dog_image, 
+      cow_image, 
+      fox_image, 
+      rabit_image, 
+      alien_image, 
   ];
 
+  useFocusEffect(
+    useCallback(() => {
+      const result = db.getAllSync("SELECT * FROM games");
+
+      const updatedData = result.map((game) => {
+        const profile1Index = game.image1 - 1;
+        const profile2Index = game.image2 - 1;
+
+        const resolvedProfile1 = images[profile1Index] || dog_image;
+        const resolvedProfile2 = images[profile2Index] || dog_image;
+
+        return { ...game, resolvedProfile1, resolvedProfile2 };
+      });
+
+      setData(updatedData);
+    }, [db])
+  );
+
   const renderItem = ({ item }) => (
-    <View className = "flex-col border-b border-primary-200 mx-5">
-        <Text className = "text-text-dark text-3xl text-center font-bold w-full py-5">{item.game_name}</Text>
-        <View className="flex-row items-center  mx-6 justify-between"> 
-        <Image className = "h-[70px] w-[70px]"
-            source={item.profile_1}
-        />
-        <Text className = "text-text-dark text-3xl font-bold">{item.score_1}</Text>
-        <Image className = "h-[70px] w-[30px]"
-            source={versus_small}
-        />
-        <Text className = "text-text-dark text-3xl font-bold">{item.score_2}</Text>
-        <Image className = "h-[70px] w-[70px]"
-            source={item.profile_2}
-        />
-        </View>
-        <View className = "flex-row justify-between mx-5 py-3">
-            <Text className = "text-text-dark text-xl font-bold w-[70px] text-center">{item.player_1}</Text>
-            <Text className = "text-text-dark text-xl font-bold w-[70px] text-center">{item.player_2}</Text>
-        </View>
-        
+    <View className="flex-col border-b border-primary-200 mx-5">
+      <Text className="text-text-dark text-3xl text-center font-bold w-full py-5">
+        {item.GameName}
+      </Text>
+      <View className="flex-row items-center mx-6 justify-between"> 
+        <Image className="h-[70px] w-[70px]" source={item.resolvedProfile1} />
+        <Text className="text-text-dark text-3xl font-bold">{item.score1}</Text>
+        <Image className="h-[70px] w-[30px]" source={versus_small} />
+        <Text className="text-text-dark text-3xl font-bold">{item.score2}</Text>
+        <Image className="h-[70px] w-[70px]" source={item.resolvedProfile2} />
+      </View>
+      <View className="flex-row justify-between mx-5 py-3">
+        <Text className="text-text-dark text-xl font-bold w-[70px] text-center">
+          {item.player1}
+        </Text>
+        <Text className="text-text-dark text-xl font-bold w-[70px] text-center">
+          {item.player2}
+        </Text>
+      </View>
     </View>
-    
   );
 
   return (
     <FlatList
-      className = "w-full"
+      className="w-full"
       data={data}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
     />
   );
 };
