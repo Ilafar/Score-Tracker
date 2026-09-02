@@ -1,4 +1,4 @@
-{
+  {
   "expo": {
     "name": "FotMob",
     "slug": "Score-Tracker",
@@ -42,10 +42,11 @@
     "extra": {
       "router": {
         "origin": false
-      },
-      "eas": {
+       },
+    "eas": {
         "projectId": "2fef489b-ed3c-472d-b8e0-61e41ae430bc"
       }
-    }
+    },
+    "owner": "ilafer"
   }
 }
